@@ -9,7 +9,7 @@
 
 <div class="container" style="background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); width: 300px;">
     <h2 style="text-align: center;">Login</h2>
-    <form id="loginForm">
+    <form id="loginForm" >
         <div class="form-group" style="margin-bottom: 15px;">
             <label for="email" style="display: block; margin-bottom: 5px;">Email:</label>
             <input type="email" id="email" name="email" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;" required>
@@ -47,7 +47,6 @@
         const messageElement = document.getElementById("message");
         if (response.ok) {
             messageElement.innerText = "Login successful!";
-            // Display the token input popup
             document.getElementById("tokenInputPopup").style.display = "flex";
         } else {
             messageElement.innerText = data.message;
@@ -56,8 +55,19 @@
 
     document.getElementById("submitToken").addEventListener("click", async function() {
         const token = document.getElementById("token").value;
-        console.log("Token:", token);
-        document.getElementById("tokenInputPopup").style.display = "none";
+        const serviceTicket = "http://localhost:2002/submitToken";
+        const response = await fetch(serviceTicket, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ token })
+        });
+        if (response.ok) {
+            window.location.href = "http://localhost:2002";
+        } else {
+            console.error("Failed to submit token");
+        }
     });
 
     document.getElementById("closePopup").addEventListener("click", function() {
