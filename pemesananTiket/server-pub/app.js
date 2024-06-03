@@ -19,7 +19,7 @@ app.post('/messages', async (req, res) => {
     }
 
     const message = {
-      id: v4(),
+      id: v4(), 
       message: req.body.message,
       date: new Date(),
     };
