@@ -4,13 +4,13 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const path = require("path");
 const app = express();
-const secret = "FQzJPco+c2FTmS8Jh/QX4RUODZ0lsoIS0MWmqql35YX8O9WAyURZ5hmGbUoe50VX4npF9phnTZeTHQ1Rq2t/Xg==";
+const secret = process.env.SUPABASE_SECRET;
 const dotenv = require("dotenv");
 dotenv.config();
 app.use(express.json());
 
 
-const Supabase_URl = "https://utzdhilbitfcdeljnctj.supabase.co";
+const Supabase_URl = process.env.SUPABASE_URL;
 const Supabase_Key = process.env.SUPABASE_KEY;
 
 const db = supabase.createClient(Supabase_URl, Supabase_Key);

@@ -47,7 +47,6 @@
         const messageElement = document.getElementById("message");
         if (response.ok) {
             messageElement.innerText = "Login successful!";
-            // Display the token input popup
             document.getElementById("tokenInputPopup").style.display = "flex";
         } else {
             messageElement.innerText = data.message;
