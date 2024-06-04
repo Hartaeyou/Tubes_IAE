@@ -7,6 +7,8 @@ const app = express();
 const PORT = 2002;
 const path = require('path');
 const cors = require('cors');
+const secret = 'FQzJPco+c2FTmS8Jh/QX4RUODZ0lsoIS0MWmqql35YX8O9WAyURZ5hmGbUoe50VX4npF9phnTZeTHQ1Rq2t/Xg==';
+const jwt = require("jsonwebtoken");
 
 app.use(cors());
 app.use(express.json());
@@ -14,7 +16,13 @@ app.use(express.json());
 app.post('/submitToken', (req, res) => {
     const { token } = req.body;
     console.log(token);
-    res.redirect('/');
+    try {
+        const decoded = jwt.verify(token, secret);
+        res.status(200).json({ message: "Token Verified" });
+    } catch (err) {
+        console.error("Invalid Token", err);
+        res.status(401).json({ message: "Invalid Token" });
+    }
 });
 
 app.get("/", (req, res) => {
