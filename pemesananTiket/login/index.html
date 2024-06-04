@@ -61,7 +61,13 @@
                 "authorization": `${token}`
             }
         });
-
+        if (response.ok) {
+            window.location.href = "http://localhost:2002";
+        }
+        else {
+        const data = await response.json();
+        alert("Failed to submit token: " + data.message);
+    }
     });
 
 

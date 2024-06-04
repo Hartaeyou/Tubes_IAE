@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
 
 const verifyToken = (req, res, next) => {
   const token = req.headers["authorization"];
-
+  console.log(token);
   if (!token) {
     return res.status(403).json({ message: "Token is required!" });
   }
@@ -44,13 +44,30 @@ app.get("/", (req, res) => {
 });
 
 app.get("/verified", verifyToken, async (req, res) => {
-    try {
-        const redirectTo = 'http://localhost:2002';
-        res.redirect(redirectTo);
-    } catch (error) {
+  try {
+      const token = req.headers["authorization"];
+      const serviceTicket = "http://localhost:2002/submitToken";
+      const response = await fetch(serviceTicket, {
+          method: 'POST',
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ token })
+      });
+      
+      if (response.ok) {
+          res.redirect("http://localhost:2002");
+      } else {
+          const resData = await response.json();
+          console.error("Failed to submit token", resData);
+          res.status(response.status).json({ message: "Failed to submit token" });
+      }
+  } catch (error) {
+      console.error(error);
       res.status(500).json({ message: 'Internal server error' });
-    }
-  });
+  }
+});
+
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
