@@ -55,20 +55,15 @@
 
     document.getElementById("submitToken").addEventListener("click", async function() {
         const token = document.getElementById("token").value;
-        const serviceTicket = "http://localhost:2002/submitToken";
-        const response = await fetch(serviceTicket, {
-            method: 'POST',
+        const response = await fetch("http://localhost:2001/verified", {
+            method: "GET",
             headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ token })
+                "authorization": `${token}`
+            }
         });
-        if (response.ok) {
-            window.location.href = "http://localhost:2002";
-        } else {
-            console.error("Failed to submit token");
-        }
+
     });
+
 
     document.getElementById("closePopup").addEventListener("click", function() {
         document.getElementById("tokenInputPopup").style.display = "none";

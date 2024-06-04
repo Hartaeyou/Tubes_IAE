@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const path = require("path");
 const app = express();
-const secret = process.env.SUPABASE_SECRET;
+const secret = 'FQzJPco+c2FTmS8Jh/QX4RUODZ0lsoIS0MWmqql35YX8O9WAyURZ5hmGbUoe50VX4npF9phnTZeTHQ1Rq2t/Xg==';
 const dotenv = require("dotenv");
 dotenv.config();
 app.use(express.json());
@@ -43,10 +43,14 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get("/data", verifyToken, async (req, res) => {
-  const response = await db.from("login_tubes").select();
-  res.json(response.data);
-});
+app.get("/verified", verifyToken, async (req, res) => {
+    try {
+        const redirectTo = 'http://localhost:2002';
+        res.redirect(redirectTo);
+    } catch (error) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
