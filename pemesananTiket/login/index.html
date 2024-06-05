@@ -9,7 +9,7 @@
 
 <div class="container" style="background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); width: 300px;">
     <h2 style="text-align: center;">Login</h2>
-    <form id="loginForm" >
+    <form id="loginForm">
         <div class="form-group" style="margin-bottom: 15px;">
             <label for="email" style="display: block; margin-bottom: 5px;">Email:</label>
             <input type="email" id="email" name="email" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;" required>
@@ -52,24 +52,32 @@
             messageElement.innerText = data.message;
         }
     });
-
     document.getElementById("submitToken").addEventListener("click", async function() {
-        const token = document.getElementById("token").value;
-        console.log(token)
-        const response = await fetch("http://localhost:2001/verified", {
-            method: "GET",
-            headers: {
-                "authorization": `${token}`
-            }
-        });
-
+    const token = document.getElementById("token").value;
+    console.log(token);
+    document.cookie = `token=${token};`;
+    
+    const response = await fetch("http://localhost:2001/verified", {
+        method: "GET",
+        headers: {
+            "Authorization": `${token}`
+        }
     });
+    const data = await response.json();
+    if (response.ok) {
+        window.location.href = "http://localhost:2002";
+    } else {
+        alert("Failed to submit token: " + data.message);
+    }
+});
 
 
-    document.getElementById("closePopup").addEventListener("click", function() {
-        document.getElementById("tokenInputPopup").style.display = "none";
-    });
+document.getElementById("closePopup").addEventListener("click", function() {
+    document.getElementById("tokenInputPopup").style.display = "none";
+});
 </script>
 
 </body>
 </html>
+
+   
