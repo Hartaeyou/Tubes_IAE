@@ -4,8 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pilih Tiket</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 <body>
-    <h1>teste</h1>
+    <nav class="navbar bg-warning">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 fw-bold fs-3">Pilih Tiket</span>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="mt-lg-5">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Nomor.</th>
+                    <th scope="col">Nama Tiket</th>
+                    <th scope="col">Harga</th>
+                    <th scope="col">Deskripsi</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Pilih</th>
+                </tr>
+                </thead>
+                <tbody id="ticketTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ticketModalLabel">Pilih Jumlah Tiket</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label for="ticketQuantity" class="form-label">Jumlah Tiket</label>
+                <input type="number" class="form-control" id="ticketQuantity" min="1" value="1">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="button" class="btn btn-primary" onclick="confirmSelection()">Konfirmasi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+
+        let orders = [];
+
+        function selectTicket(id) {
+            selectedTicketId = id;
+            const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+            modal.show();
+        }
+
+        async function confirmSelection () {
+            const quantity = document.getElementById('ticketQuantity').value;
+            alert(`Tiket ID: ${selectedTicketId}, Jumlah: ${quantity}`);
+            // Tambahkan logika untuk menangani pemesanan tiket di sini
+            const response = await fetch(`http://localhost:2002/submit/${selectedTicketId}`)
+            if (response.ok) { 
+                const data = await response.json();
+                data.data.forEach((ticket, index) => {
+                    const ticketId = ticket.id;
+                    const ticketName = ticket.Nama_Tiket;
+                    const ticketPrice = ticket.Harga;
+                    const ticketDescription = ticket.Deskripsi;
+                    const ticketDate = ticket.Tanggal;
+                    orders.push({ id: ticketId, ticketNama:ticketName, ticketPrice:ticketPrice, ticketDescription:ticketDescription, quantity: quantity , quantityPrice: ticketPrice*quantity});
+                });
+                console.log(orders);
+                
+
+            } else {
+                alert("gagal")
+            }
+            // Tutup modal setelah konfirmasi
+
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('http://localhost:2002/data');
+                if (response.ok) {
+                    const data = await response.json();
+                    const tableBody = document.getElementById('ticketTableBody');
+                    
+                    data.data.forEach((ticket, index) => {
+                        const row = document.createElement('tr');
+                        
+                        row.innerHTML = `
+                            <th scope="row">${index + 1}</th>
+                            <td>${ticket.Nama_Tiket}</td>
+                            <td>${ticket.Harga}</td>
+                            <td>${ticket.Deskripsi}</td>
+                            <td>${ticket.Tanggal}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="selectTicket(${ticket.id})">Pilih</button>
+                            </td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    alert('Failed to fetch data');
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
 </html>

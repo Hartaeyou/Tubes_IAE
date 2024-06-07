@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 const verifyToken = (req, res, next) => {
     const token = req.cookies.token;
-    console.log(token);
+    
     if (!token) {
         return res.status(403).json({ message: 'Token is required!' });
     }
@@ -36,12 +36,25 @@ app.get('/', verifyToken, (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/data', async (req, res) => {
+app.get('/data', verifyToken, async (req, res) => {
     const { data, error } = await db.from('ticket').select();
     if (error) {
         res.status(500).json({ error: error.message });
     } else {
         res.json({ data });
+    }
+});
+
+app.get('/submit/:id', verifyToken, async (req, res) => {
+    const { id } = req.params;
+    const { data, error } = await db.from('ticket').select().eq('id', id);
+
+    if (error) {
+        res.status(500).json({ error: error.message });
+    } else if (data.length === 0) {
+        res.status(404).json({ error: 'Ticket not found' });
+    } else {
+        res.json({ data: data }); // Mengembalikan tiket yang ditemukan
     }
 });
 
