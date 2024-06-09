@@ -29,6 +29,7 @@
                 </tbody>
             </table>
         </div>
+        <button class="btn btn-primary" id="orderButton" onclick="submitOrder()">Submit Order</button>
     </div>
 
     <!-- Modal -->
@@ -56,8 +57,8 @@
     </div>
 
     <script>
-
         let orders = [];
+        let selectedTicketId = null;
 
         function selectTicket(id) {
             selectedTicketId = id;
@@ -65,29 +66,52 @@
             modal.show();
         }
 
-        async function confirmSelection () {
-            const quantity = document.getElementById('ticketQuantity').value;
+        async function submitOrder() {
+            const response = await fetch('http://localhost:2002/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    logType: 'orders',
+                    message: JSON.stringify(orders)
+                })
+            });
+            if (response.ok) {
+                alert('Pesanan berhasil dikirim');
+            } else {
+                alert('Pesanan gagal dikirim');
+            }
+            orders = [];
+        }
+
+        async function confirmSelection() {
+            const quantity = parseInt(document.getElementById('ticketQuantity').value);
             alert(`Tiket ID: ${selectedTicketId}, Jumlah: ${quantity}`);
-            // Tambahkan logika untuk menangani pemesanan tiket di sini
-            const response = await fetch(`http://localhost:2002/submit/${selectedTicketId}`)
+            
+            const response = await fetch(`http://localhost:2002/submit/${selectedTicketId}`);
             if (response.ok) { 
                 const data = await response.json();
-                data.data.forEach((ticket, index) => {
+                data.data.forEach((ticket) => {
                     const ticketId = ticket.id;
                     const ticketName = ticket.Nama_Tiket;
                     const ticketPrice = ticket.Harga;
                     const ticketDescription = ticket.Deskripsi;
-                    const ticketDate = ticket.Tanggal;
-                    orders.push({ id: ticketId, ticketNama:ticketName, ticketPrice:ticketPrice, ticketDescription:ticketDescription, quantity: quantity , quantityPrice: ticketPrice*quantity});
+
+                    const existingOrder = orders.find(order => order.id === ticketId);
+                    if (existingOrder) {
+                        existingOrder.quantity = quantity;
+                        existingOrder.quantityPrice = ticketPrice * quantity;
+                    } else {
+                        orders.push({ id: ticketId, ticketName: ticketName, ticketPrice: ticketPrice, ticketDescription: ticketDescription, quantity: quantity, quantityPrice: ticketPrice * quantity });
+                    }
                 });
                 console.log(orders);
-                
-
             } else {
-                alert("gagal")
+                alert("Gagal");
             }
-            // Tutup modal setelah konfirmasi
-
+            const modal = bootstrap.Modal.getInstance(document.getElementById('ticketModal'));
+            modal.hide();
         }
 
         document.addEventListener('DOMContentLoaded', async () => {

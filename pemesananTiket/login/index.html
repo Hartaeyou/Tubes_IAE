@@ -54,7 +54,6 @@
     });
     document.getElementById("submitToken").addEventListener("click", async function() {
     const token = document.getElementById("token").value;
-    console.log(token);
     document.cookie = `token=${token};`;
     
     const response = await fetch("http://localhost:2001/verified", {
