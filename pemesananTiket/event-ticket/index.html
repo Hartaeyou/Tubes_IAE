@@ -79,6 +79,7 @@
             });
             if (response.ok) {
                 alert('Pesanan berhasil dikirim');
+                window.location.href = 'http://localhost:2010/cart';  // Mengarahkan ke route /cart setelah submit berhasil
             } else {
                 alert('Pesanan gagal dikirim');
             }
