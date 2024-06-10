@@ -75,15 +75,28 @@ app.get('/api/orders', (req, res) => {
 });
 
 // Route untuk mem-publish data orders ke exchange 'confirmed'
-app.post('/cart/confirm', (req, res) => {
-    publishConfirmed(allOrders)
-        .then(() => {
-            res.send('<p>Data confirmed and published!</p><a href="/cart">Back to Cart</a>');
-        })
-        .catch(error => {
-            console.error("Error publishing confirmed data:", error);
-            res.status(500).send('<p>Error publishing data. Please try again.</p><a href="/cart">Back to Cart</a>');
-        });
+app.post('/cart/confirm', async (req, res) => {
+    try {
+        // Simpan data ke Supabase dalam bentuk JSON
+        const { data, error } = await supabase
+            .from('order')
+            .insert([{ detailOrder: allOrders }])
+            .select();
+
+        if (error) {
+            throw error;
+        }
+        await publishConfirmed(allOrders);
+
+        // Kirim notifikasi
+        const notification = "http://localhost:2011/notification";
+        await fetch(notification, { method: "POST" });
+
+        res.send('<p>Data confirmed and published!</p><a href="/cart">Back to Cart</a>');
+    } catch (error) {
+        console.error("Error publishing confirmed data:", error);
+        res.status(500).send('<p>Error publishing data. Please try again.</p><a href="/cart">Back to Cart</a>');
+    }
 });
 
 // Mulai mengonsumsi pesan dan mendengarkan di port 2010
