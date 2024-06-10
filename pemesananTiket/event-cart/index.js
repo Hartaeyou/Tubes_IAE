@@ -2,12 +2,17 @@ const amqp = require('amqplib');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+
 const app = express();
+const PORT = 2010;
 
-
+// Konfigurasi Supabase
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1a3pnaWp2cGRyeW55dnF5dWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTgwMzUxNDksImV4cCI6MjAzMzYxMTE0OX0.r-jkjZ1huwzmDnskM4LQR9TZeMZNNxdHn-yNK5XpOaI'
+const SUPABASE_URL = 'https://bukzgijvpdrynyvqyulo.supabase.co';
+const supabase = createClient(SUPABASE_URL, supabaseKey);
 
 const allOrders = [];
-const PORT = 2010;
 
 
 app.use(bodyParser.json());
@@ -73,10 +78,7 @@ app.get('/api/orders', (req, res) => {
 app.post('/cart/confirm', (req, res) => {
     publishConfirmed(allOrders)
         .then(() => {
-            const notification = "http://localhost:2011/notification";
-            const response =  fetch(notification,{
-                method: "POST",
-            });
+            res.send('<p>Data confirmed and published!</p><a href="/cart">Back to Cart</a>');
         })
         .catch(error => {
             console.error("Error publishing confirmed data:", error);
