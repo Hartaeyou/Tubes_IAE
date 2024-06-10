@@ -50,8 +50,22 @@
                 console.error('Error fetching orders:', error);
             }
         }
-        window.onload = fetchOrders;
+
+        // Fungsi untuk mengirim data pesanan ke exchange 'confirmed' saat tombol diklik
+        async function confirmOrders() {
+            try {
+                const response = await fetch('/cart/confirm', {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Error confirming orders:', error);
+            }
+        }
+
+        window.onload = function() {
+            fetchOrders();
+            document.getElementById('confirmButton').addEventListener('click', confirmOrders);
+        };
     </script>
 </body>
-
 </html>

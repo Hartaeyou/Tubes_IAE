@@ -4,8 +4,11 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
 
+
+
 const allOrders = [];
 const PORT = 2010;
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -70,7 +73,10 @@ app.get('/api/orders', (req, res) => {
 app.post('/cart/confirm', (req, res) => {
     publishConfirmed(allOrders)
         .then(() => {
-            res.send('<p>Data confirmed and published!</p><a href="/cart">Back to Cart</a>');
+            const notification = "http://localhost:2011/notification";
+            const response =  fetch(notification,{
+                method: "POST",
+            });
         })
         .catch(error => {
             console.error("Error publishing confirmed data:", error);

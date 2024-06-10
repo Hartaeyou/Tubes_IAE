@@ -91,11 +91,19 @@ app.post("/login", async (req, res) => {
         subject: "Your Login Token",
         text: `Here is your login token: ${token}`,
       };
-      transporter.sendMail(mailOptions, (error) => {
+      transporter.sendMail(mailOptions, async(error) => {
         if (error) {
           console.error("Error sending email:", error);
           return res.status(500).json({ message: "Error sending email" });
         } else {
+          const notificationServiceUrl = 'http://localhost:2011/set-email';
+          await fetch(notificationServiceUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+          });
           res.json({ message: "Token sent to email" });
         }
       });
