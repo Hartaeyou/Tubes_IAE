@@ -2,10 +2,17 @@ const amqp = require('amqplib');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+
 const app = express();
+const PORT = 2010;
+
+// Konfigurasi Supabase
+const SUPABASE_URL = 'https://bukzgijvpdrynyvqyulo.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1a3pnaWp2cGRyeW55dnF5dWxvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTgwMzUxNDksImV4cCI6MjAzMzYxMTE0OX0.r-jkjZ1huwzmDnskM4LQR9TZeMZNNxdHn-yNK5XpOaI'
+const supabase = createClient(SUPABASE_URL, supabaseKey);
 
 const allOrders = [];
-const PORT = 2010;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -67,15 +74,34 @@ app.get('/api/orders', (req, res) => {
 });
 
 // Route untuk mem-publish data orders ke exchange 'confirmed'
-app.post('/cart/confirm', (req, res) => {
-    publishConfirmed(allOrders)
-        .then(() => {
-            res.send('<p>Data confirmed and published!</p><a href="/cart">Back to Cart</a>');
-        })
-        .catch(error => {
-            console.error("Error publishing confirmed data:", error);
-            res.status(500).send('<p>Error publishing data. Please try again.</p><a href="/cart">Back to Cart</a>');
-        });
+app.post('/cart/confirm', async (req, res) => {
+    try {
+        // Simpan data ke Supabase dalam bentuk JSON
+        const { data, error } = await supabase
+            .from('order')
+            .insert([{ detailOrder: allOrders }])
+            .select();
+
+        if (error) {
+            throw error;
+        }
+
+        const orderId = data[0].id;
+
+        // Siapkan data untuk dipublikasikan
+        const dataToPublish = {
+            orderId: orderId,
+            detailOrder: allOrders
+        };
+
+        // Publikasikan data ke exchange 'confirmed'
+        await publishConfirmed(dataToPublish);
+
+        res.send('<p>Data confirmed and published!</p><a href="/cart">Back to Cart</a>');
+    } catch (error) {
+        console.error("Error publishing confirmed data:", error);
+        res.status(500).send('<p>Error publishing data. Please try again.</p><a href="/cart">Back to Cart</a>');
+    }
 });
 
 // Mulai mengonsumsi pesan dan mendengarkan di port 2010
