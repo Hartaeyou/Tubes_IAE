@@ -54,12 +54,14 @@
     });
     document.getElementById("submitToken").addEventListener("click", async function() {
     const token = document.getElementById("token").value;
+    const email = document.getElementById("email").value;
     document.cookie = `token=${token};`;
     
     const response = await fetch("http://localhost:2001/verified", {
         method: "GET",
         headers: {
-            "Authorization": `${token}`
+            "Authorization": `${token}`,
+            body: JSON.stringify({ email})
         }
     });
     const data = await response.json();
